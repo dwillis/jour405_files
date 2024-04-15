@@ -1,0 +1,162 @@
+```{r}
+library(tidyverse)
+library(lubridate)
+library(janitor)
+```
+
+## Testing Statistical Significance with P-values
+
+### Are Maryland's WBB players shorter than other D-I teams' players?
+
+```{r}
+# Load the data
+
+wbb_rosters <- read_csv("https://raw.githubusercontent.com/Sports-Roster-Data/womens-college-basketball/main/wbb_rosters_2023_24.csv") |> filter(!is.na(total_inches)) |> filter(division == 'I')
+
+sample_data <- wbb_rosters[sample(nrow(wbb_rosters), 100), ]
+
+maryland <- wbb_rosters |> filter(ncaa_id == 392)
+```
+
+#### Define hypotheses
+
+Null Hypothesis (H0): There is no significant difference in the average height of players on Maryland compared to the average height of a sample of players from the NCAA's Division I.
+
+Alternative Hypothesis (H1): There is a significant difference in the average height of players on Maryland compared to the average height of a sample of players from the NCAA's Division I.
+
+
+```{r}
+
+# Set significance level
+alpha <- 0.05
+
+# Perform the hypothesis test
+result <- t.test(maryland$total_inches, mu = mean(sample_data$total_inches))
+
+# Calculate p-value
+p_value <- result$p.value
+
+# Make a decision
+if (p_value < alpha) {
+  decision <- "Reject the null hypothesis"
+} else {
+  decision <- "Fail to reject the null hypothesis"
+}
+
+# Interpretation
+interpretation <- paste("Based on the p-value of", round(p_value, 4),
+                        ", at a significance level of", alpha,
+                        ", we", decision, "and conclude that there is",
+                        "a significant difference in the average height of players",
+                        "on Maryland compared to the average height of players across",
+                        "all teams in the league.")
+
+interpretation
+
+```
+
+### Prince George's County Crime Data
+
+```{r}
+pg_crimes <- read_csv("https://raw.githubusercontent.com/dwillis/jour405_files/main/Crime_Incidents_July_2023_to_Present_20240414.csv") |> clean_names()
+
+pg_crimes <- pg_crimes |> 
+  mutate(clean_date = mdy_hms(date), month = month(clean_date), week_day = wday(clean_date))
+
+pg_crimes |> 
+  filter(str_detect(clearance_code_inc_type, "AUTO, STOLEN")) |> 
+  group_by(month) |> 
+  summarize(total = n())
+```
+
+### Questions about crimes over time: 
+
+#### Stolen cars by month: was March's decline statistically significant?
+
+Null Hypothesis: 
+Alternative Hypothesis: 
+
+### Set up our t.test by creating an average based on pre-March figures
+
+```{r}
+
+car_thefts <- pg_crimes |> 
+  filter(!month %in% c(3, 4)) |>  # April isn't finished yet
+  filter(str_detect(clearance_code_inc_type, "AUTO, STOLEN")) |> 
+  group_by(month) |> 
+  summarize(total = n())
+
+# Set significance level
+alpha <- 0.05
+
+# Get summary stats
+car_thefts |> 
+  summarize(mean = mean(total), sd = sd(total))
+
+# Perform the hypothesis test
+result <- t.test(car_thefts$total, mu = 358)
+
+# Calculate p-value
+p_value <- result$p.value
+
+# Make a decision
+if (p_value < alpha) {
+  decision <- "Reject the null hypothesis"
+} else {
+  decision <- "Fail to reject the null hypothesis"
+}
+
+# Interpretation
+interpretation <- paste("Based on the p-value of", round(p_value, 4),
+                        ", at a significance level of", alpha,
+                        ", we", decision)
+
+interpretation
+result
+```
+
+#### What about murders?
+
+Null Hypothesis: There has been no significant change in murders this year.
+Alternative Hypothesis: There has been a significant change in murders this year.
+
+### Set up our data
+
+```{r}
+# Given data
+homicides <- pg_crimes |> 
+  filter(month != 4) |>  # April isn't finished yet
+  filter(clearance_code_inc_type == 'HOMICIDE') |> 
+  group_by(month) |> 
+  summarize(total = n())
+
+# Set significance level
+alpha <- 0.05
+
+# Calculate the sample mean
+homicides |> 
+  summarize(mean = mean(total), sd = sd(total))
+
+# Perform one-sample t-test
+test_result <- t.test(homicides, mu = 7)
+
+# Extract p-value
+p_value <- test_result$p.value
+
+# Make decision based on p-value
+if (p_value < alpha) {
+  decision <- "reject the null hypothesis"
+} else {
+  decision <- "fail to reject the null hypothesis"
+}
+
+# Print the results
+cat("Results of the significance test for change in murders by month:\n")
+cat("Test statistic:", round(test_result$statistic, 2), "\n")
+cat("p-value:", round(p_value, 4), "\n")
+cat("Conclusion:", decision, "at the", alpha, "significance level.\n")
+
+
+```
+
+
