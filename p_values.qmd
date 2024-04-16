@@ -44,7 +44,7 @@ standard_deviation <- sd(maryland$total_inches)
 alpha <- 0.05
 
 # Perform the hypothesis test
-result <- t.test(x = maryland$total_inches, mu = mean(sample_data$total_inches), sd = standard_deviation / sqrt(nrow(population_data)), alternative = "two.sided")
+result <- t.test(x = maryland$total_inches, mu = mean(population_data$total_inches), sd = standard_deviation / sqrt(nrow(population_data)), alternative = "two.sided")
 
 # Calculate p-value
 p_value <- result$p.value
