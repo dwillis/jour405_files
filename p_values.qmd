@@ -13,7 +13,7 @@ library(janitor)
 
 wbb_rosters <- read_csv("https://raw.githubusercontent.com/Sports-Roster-Data/womens-college-basketball/main/wbb_rosters_2023_24.csv") |> filter(!is.na(total_inches)) |> filter(division == 'I')
 
-sample_data <- wbb_rosters[sample(nrow(wbb_rosters), 100), ]
+population_data <- wbb_rosters[sample(nrow(wbb_rosters), 100), ]
 
 maryland <- wbb_rosters |> filter(ncaa_id == 392)
 ```
@@ -25,35 +25,50 @@ Null Hypothesis (H0): There is no significant difference in the average height o
 Alternative Hypothesis (H1): There is a significant difference in the average height of players on Maryland compared to the average height of a sample of players from the NCAA's Division I.
 
 
+### The Formula
+
+To calculate a t-test for significance, we need to use averages of the height of both the sample data (maryland) and the population (population_data), the standard deviation among our sample and the significance level or alpha, which is at the 95% confidence interval.
+
 ```{r}
+
+# average Maryland height
+mean(maryland$total_inches)
+
+# average sample height
+mean(population_data$total_inches)
+
+# standard deviation among Maryland players
+standard_deviation <- sd(maryland$total_inches)
 
 # Set significance level
 alpha <- 0.05
 
 # Perform the hypothesis test
-result <- t.test(maryland$total_inches, mu = mean(sample_data$total_inches))
+result <- t.test(x = maryland$total_inches, mu = mean(sample_data$total_inches), sd = standard_deviation / sqrt(nrow(population_data)), alternative = "two.sided")
 
 # Calculate p-value
 p_value <- result$p.value
 
 # Make a decision
 if (p_value < alpha) {
-  decision <- "Reject the null hypothesis"
+  decision <- "Reject the null hypothesis, so there is a"
 } else {
-  decision <- "Fail to reject the null hypothesis"
+  decision <- "Fail to reject the null hypothesis, so there is no"
 }
 
 # Interpretation
 interpretation <- paste("Based on the p-value of", round(p_value, 4),
                         ", at a significance level of", alpha,
-                        ", we", decision, "and conclude that there is",
-                        "a significant difference in the average height of players",
-                        "on Maryland compared to the average height of players across",
-                        "all teams in the league.")
+                        ", we", decision, "statistically significant difference in the average height of Maryland players compared to a sample of all Division I players.")
 
 interpretation
 
 ```
+
+The key findings are:
+
+  * The average height of Maryland players is **significantly higher** than the average height of the sampled Division I players.
+  * This difference is statistically significant, meaning it is unlikely to have occurred by chance.
 
 ### Prince George's County Crime Data
 
@@ -69,32 +84,30 @@ pg_crimes |>
   summarize(total = n())
 ```
 
-### Questions about crimes over time: 
+### Stolen cars by month
 
-#### Stolen cars by month: was March's decline statistically significant?
+Null Hypothesis: March's decline was not statistically significant and a result of random chance.
+Alternative Hypothesis: March's decline was statistically significant.
 
-Null Hypothesis: 
-Alternative Hypothesis: 
-
-### Set up our t.test by creating an average based on pre-March figures
+### Set up our t.test
 
 ```{r}
 
-car_thefts <- pg_crimes |> 
-  filter(!month %in% c(3, 4)) |>  # April isn't finished yet
-  filter(str_detect(clearance_code_inc_type, "AUTO, STOLEN")) |> 
-  group_by(month) |> 
-  summarize(total = n())
+# Load the data for all months from July through March, skipping April because it's not finished
+car_thefts <- c(673, 596, 469, 525, 531, 551, 429, 451, 358)
 
-# Set significance level
+# set the confidence interval
 alpha <- 0.05
 
-# Get summary stats
-car_thefts |> 
-  summarize(mean = mean(total), sd = sd(total))
+# Calculate the mean and standard deviation of all the months
+all_months_mean <- mean(car_thefts)
+all_months_sd <- sd(car_thefts)
 
-# Perform the hypothesis test
-result <- t.test(car_thefts$total, mu = 358)
+# Perform the t-test
+result <- t.test(car_thefts, mu = all_months_mean, alternative = "less")
+
+# Print the results
+print(result)
 
 # Calculate p-value
 p_value <- result$p.value
@@ -112,8 +125,15 @@ interpretation <- paste("Based on the p-value of", round(p_value, 4),
                         ", we", decision)
 
 interpretation
-result
 ```
+
+But wait, we didn't use the standard deviation in our t.test! Here's why:
+
+    * When you have the entire data set, the t.test() function can calculate the necessary statistics (mean, standard deviation) internally.
+    * Providing the standard deviation as a separate figure is only required when you want to use a hypothesized standard deviation, rather than estimating it from the sample data.
+
+So, the t-test works with the full data set (car_thefts) because it can derive all the necessary statistics directly from the provided observations, without requiring the standard deviation as a separate input. If you are wondering, we didn't need to do the standard deviation for the Maryland players, either, because we have all of them (but it didn't hurt anything by adding it). Which is one more reason to calculate t-tests in R and not by hand. 
+
 
 #### What about murders?
 
@@ -124,7 +144,7 @@ Alternative Hypothesis: There has been a significant change in murders this year
 
 ```{r}
 # Given data
-homicides <- pg_crimes |> 
+pg_crimes |> 
   filter(month != 4) |>  # April isn't finished yet
   filter(clearance_code_inc_type == 'HOMICIDE') |> 
   group_by(month) |> 
@@ -133,15 +153,21 @@ homicides <- pg_crimes |>
 # Set significance level
 alpha <- 0.05
 
-# Calculate the sample mean
-homicides |> 
-  summarize(mean = mean(total), sd = sd(total))
+# Load the data from July through March
+homicides <- c(6, 4, 5, 10, 4, 7, 5, 4, 7)
 
-# Perform one-sample t-test
-test_result <- t.test(homicides, mu = 7)
+# Calculate the mean and standard deviation of the data
+homicides_mean <- mean(homicides)
+homicides_sd <- sd(homicides)
+
+# Perform the t-test
+results <- t.test(homicides, mu = homicides_mean)
+
+# Print the results
+print(results)
 
 # Extract p-value
-p_value <- test_result$p.value
+p_value <- results$p.value
 
 # Make decision based on p-value
 if (p_value < alpha) {
@@ -150,13 +176,7 @@ if (p_value < alpha) {
   decision <- "fail to reject the null hypothesis"
 }
 
-# Print the results
-cat("Results of the significance test for change in murders by month:\n")
-cat("Test statistic:", round(test_result$statistic, 2), "\n")
-cat("p-value:", round(p_value, 4), "\n")
-cat("Conclusion:", decision, "at the", alpha, "significance level.\n")
-
+decision
 
 ```
-
-
+This result indicates that the variation in homicides across the 9 months, from July to March, is not statistically significant. The monthly homicide counts are not different from the overall mean of 5.77 in a statistically meaningful way. The t-test shows that the fluctuations in homicides during this time period are likely just due to random chance and do not represent a significant change or pattern in the data. The ranges for the 95 percent confidence interval show this; 7 is within that range.
