@@ -9,7 +9,6 @@ format: html
 Multiple correlation analysis is a statistical method used to understand the relationship between one dependent variable and two or more independent variables. This analysis is particularly useful in journalism for exploring complex relationships, such as how different factors collectively impact outcomes like election results, economic indicators, or sports performances. By understanding these relationships, journalists can provide deeper insights and more accurate predictions.
 
 ```{r setup}
-library(readxl)
 library(tidyverse)
 #install.packages('corrplot')
 library(corrplot)
@@ -20,7 +19,7 @@ library(corrplot)
 The first step in our analysis is to load the data. Here we read the data from an Excel file, which contains various statistics for NFL teams from the 2019 season. This dataset will be used to build our model.
 
 ```{r}
-teams <- read_excel("nfl_2019.xlsx")
+teams <- read_csv("https://raw.githubusercontent.com/dwillis/jour405_files/main/nfl_2019.csv")
 ```
 
 ## Model Building
