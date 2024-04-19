@@ -1,6 +1,7 @@
 ```{r}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
+options(scipen = 999)
 ```
 
 ## Identifying Schools with Biggest Differences in Math Test Scores
@@ -16,7 +17,7 @@ This analysis can be useful for journalists and policymakers to understand which
 First, let's load the data into a data frame using the read_csv() function from the tidyverse library.
 
 ```{r}
-schools <- read_csv("Wk13 A2 Q3.csv")
+schools <- read_csv("montgomery_pa.csv")
 ```
 
 ### Performing Linear Regression
@@ -25,5 +26,46 @@ Next, we'll perform a linear regression analysis using the lm() function. We'll 
 
 ```{r}
 model <- lm(`% Met or Exceeded Math Expectations` ~ `FARMS Pct`, data = schools)
+
+summary(model)
 ```
 
+### Identifying Schools with Biggest Residuals
+
+To find the schools with the biggest differences between their actual and expected math test scores, we'll extract the residuals from the linear regression model. The residuals represent the difference between the actual and predicted values.
+
+We'll then use the arrange() function to sort the data frame by the residuals, both in descending and ascending order, and take the top 5 schools in each direction.
+
+```{r}
+schools$predicted <- predict(model)
+
+# Calculate the residuals
+schools$residual <- schools$`% Met or Exceeded Math Expectations` - schools$predicted
+
+# Sort the data frame by the absolute value of the residuals in descending order
+schools <- schools %>%
+  mutate(abs_residual = abs(residual)) %>%
+  arrange(desc(abs_residual))
+
+```
+The schools with the biggest positive residuals are performing better than expected, while the schools with the biggest negative residuals are performing worse than expected, based on their FARMS percentage.
+
+### Creating a Scatterplot
+
+Finally, let's create a scatterplot to visualize the relationship between the FARMS percentage and the percentage of students who met or exceeded math expectations. We'll use ggplot2 to create the plot and add a linear regression line.
+
+```{r}
+schools %>%
+  ggplot(aes(x = `FARMS Pct`, y = `% Met or Exceeded Math Expectations`)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE, color = "red") +
+  labs(x = "FARMS Percentage", y = "% Met or Exceeded Math Expectations", title = "Scatterplot of Math Expectations vs FARMS Percentage")
+```
+
+The scatterplot shows the overall trend of the relationship between the FARMS percentage and the math test scores. The red line represents the linear regression line, which helps us understand the average relationship between the two variables.
+
+By identifying the schools with the biggest residuals, we can further investigate the factors that may be contributing to their performance, either positive or negative, compared to the general trend.
+
+## Describe the Plot
+
+What's the general trend described by this model and the scatterplot? Write it in the form of a sentence that describes what happens when one of the variables increases.
