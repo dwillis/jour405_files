@@ -1,0 +1,29 @@
+```{r}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+## Identifying Schools with Biggest Differences in Math Test Scores
+
+### Introduction
+
+In this analysis, we will use linear regression to identify the schools that show the biggest differences between their actual and expected math test scores. We'll then create a scatterplot to visualize the relationship between the FARMS (Free and Reduced-price Meal System) percentage and the percentage of students who met or exceeded math expectations.
+
+This analysis can be useful for journalists and policymakers to understand which schools are performing better or worse than expected, based on the socioeconomic status of their student population. By identifying these schools, targeted interventions and support can be provided to help improve student outcomes.
+
+### Loading and Preparing the Data
+
+First, let's load the data into a data frame using the read_csv() function from the tidyverse library.
+
+```{r}
+schools <- read_csv("Wk13 A2 Q3.csv")
+```
+
+### Performing Linear Regression
+
+Next, we'll perform a linear regression analysis using the lm() function. We'll set the percentage of students who met or exceeded math expectations as the dependent variable, and the FARMS percentage as the independent variable.
+
+```{r}
+model <- lm(`% Met or Exceeded Math Expectations` ~ `FARMS Pct`, data = schools)
+```
+

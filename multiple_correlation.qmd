@@ -16,7 +16,7 @@ library(corrplot)
 
 ## Data Import
 
-The first step in our analysis is to load the data. Here we read the data from an Excel file, which contains various statistics for NFL teams from the 2019 season. This dataset will be used to build our model.
+The first step in our analysis is to load the data. Here we read the data from a CSV file, which contains various statistics for NFL teams from the 2019 season. This dataset will be used to build our model.
 
 ```{r}
 teams <- read_csv("https://raw.githubusercontent.com/dwillis/jour405_files/main/nfl_2019.csv")
