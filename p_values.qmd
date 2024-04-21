@@ -180,3 +180,41 @@ decision
 
 ```
 This result indicates that the variation in homicides across the 9 months, from July to March, is not statistically significant. The monthly homicide counts are not different from the overall mean of 5.77 in a statistically meaningful way. The t-test shows that the fluctuations in homicides during this time period are likely just due to random chance and do not represent a significant change or pattern in the data. The ranges for the 95 percent confidence interval show this; 7 is within that range.
+
+
+### When we have a mean but not the actual times (like the homework!)
+
+If we don't have the individual figures for a set, just the mean, then we can calculate the t-statistic another way, using the function `pt`. Let's say that we have the following scenario:
+
+**Background**: Sarah, an amateur runner, usually runs a 5k (3.1 miles) race with an average time of 25.5 minutes. She has a standard deviation of 1.2 minutes in her past race timings.
+
+**Intervention**: Her coach suggested that a new energy drink could help her run faster. Sarah decided to try the energy drink and recorded her race times for 15 subsequent 5k races.
+
+**Data**: After using the new energy drink, Sarah’s mean time for these 15 races was 24.8 minutes.
+
+**Objective**: Sarah’s coach thinks that the energy drink has significantly improved her running times. Perform a hypothesis test with a preset alpha of 0.05 to evaluate this claim, assuming the running times are normally distributed.
+
+```{r}
+# Define the sample data
+sample_mean <- 24.8
+hypothesized_mean <- 25.5
+sample_std_dev <- 1.2
+sample_size <- 15
+
+# Calculate the t-statistic
+t_statistic <- (sample_mean - hypothesized_mean) / (sample_std_dev / sqrt(sample_size))
+
+# Calculate the degrees of freedom
+degrees_of_freedom <- sample_size - 1
+
+# Calculate the p-value for a one-tailed test (left-tailed)
+p_value <- pt(t_statistic, df = degrees_of_freedom)
+
+# Display the results: t-statistic and p-value
+t_statistic
+p_value
+
+
+```
+
+If the p-value is less than 0.05, it indicates that there is statistically significant evidence to reject the null hypothesis, suggesting that the energy drink helps Sarah run faster. In this case, there is.
