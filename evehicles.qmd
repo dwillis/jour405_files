@@ -1,0 +1,79 @@
+---
+title: "Analysis of Electric and Hybrid Vehicle Registrations"
+format: html
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+```
+
+```{r}
+# Load the dataset
+vehicle_data <- read_csv("electric_hybrid_0424.csv")
+
+# Check for any missing values and get a quick overview
+summary(vehicle_data)
+```
+
+### Descriptive Statistics
+
+```{r}
+# Calculate total registrations and registrations per capita
+vehicle_data <- vehicle_data %>%
+  mutate(
+    Total_Registrations = Electric + Hybrid,
+    Electric_per_1000 = (Electric / Population) * 1000,
+    Hybrid_per_1000 = (Hybrid / Population) * 1000
+  )
+
+# Display summary by county
+vehicle_data %>%
+  arrange(desc(Total_Registrations))
+
+```
+
+### Correlation
+
+```{r}
+# Correlation between electric and hybrid vehicles
+cor_test <- cor.test(vehicle_data$Electric, vehicle_data$Hybrid)
+cor_test
+
+# Comparing electric and hybrid vehicle registrations using paired t-test
+t_test <- t.test(vehicle_data$Electric, vehicle_data$Hybrid, paired = TRUE)
+t_test
+
+```
+
+### Linear Regression
+
+```{r}
+# Fit the linear regression model
+model <- lm(Hybrid ~ Electric, data = vehicle_data)
+
+# Summarize the model to view coefficients and statistics
+summary(model)
+
+```
+
+```{r}
+# Calculate residuals
+residuals <- residuals(model)
+
+# Basic summary of residuals
+summary(residuals)
+
+```
+```{r}
+# Make predictions
+predictions <- predict(model, newdata = vehicle_data)
+
+# Add predictions and residuals to the original data
+vehicle_data$Predicted_Hybrid <- predictions
+vehicle_data$Residuals <- residuals
+
+# View the updated data frame
+vehicle_data |> arrange(desc(Residuals))
+
+```
+

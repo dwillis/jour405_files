@@ -17,7 +17,7 @@ This analysis can be useful for journalists and policymakers to understand which
 First, let's load the data into a data frame using the read_csv() function from the tidyverse library.
 
 ```{r}
-schools <- read_csv("montgomery_pa.csv")
+schools <- read_csv("montgomery_md.csv")
 ```
 
 ### Performing Linear Regression

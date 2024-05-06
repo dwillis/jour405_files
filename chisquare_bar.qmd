@@ -1,0 +1,52 @@
+---
+title: "Chi-Square Test for Daily Bar Sales"
+format:
+  html:
+    code-fold: true
+---
+
+```{r}
+library(tidyverse)
+library(vcd)
+```
+
+### Load the Data:
+
+```{r}
+bar_sales <- read_csv("https://raw.githubusercontent.com/dwillis/jour405_files/main/bar_sales.csv")
+```
+
+
+## Scenario
+
+You received a tip that a local bar is cheating the tax collector. After interviewing the bar owner, you learn that the bar's weekly sales total $49,000, and the owner claims that the daily traffic for the week is broken down into the following percentages, on which he pays sales taxes on his weekly total:
+
+```{r}
+bar_sales |> 
+  select(day, percentage, expected)
+```
+
+However, you obtained the actual daily sales observations for the week from that disgruntled accountant:
+
+```{r}
+bar_sales |> 
+  select(day, observed_percentage, observed_sales)
+```
+
+
+### Chi-Square Test
+
+To determine if the observed daily sales align with the expected percentages reported by the bar owner, we will perform a chi-square test:
+
+```{r}
+chisq_result <- chisq.test(bar_sales$observed_sales, p = bar_sales$percentage)
+chisq_result
+```
+
+```{r}
+alpha <- 0.10
+df <- length(bar_sales$day) - 1
+critical_value <- qchisq(alpha, df, lower.tail = FALSE)
+critical_value
+```
+

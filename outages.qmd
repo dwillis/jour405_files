@@ -1,0 +1,76 @@
+---
+title: "Analysis of Power Outages in Maryland Counties"
+format: html
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(lubridate)
+library(broom)
+```
+
+```{r}
+# Sample data loading step - adjust path as necessary
+outages_data <- read_csv("outages.csv")
+```
+
+### Z-Scores
+
+```{r}
+mean_percent_out <- mean(outages_data$percent_out)
+sd_percent_out <- sd(outages_data$percent_out)
+
+outages_data$z_score <- (outages_data$percent_out - mean_percent_out) / sd_percent_out
+
+outliers <- outages_data %>%
+  filter(abs(z_score) > 3)
+
+
+```
+
+### Differences Across Counties
+
+```{r}
+
+outages_data %>%
+  group_by(area) %>%
+  summarise(
+    mean_percent_out = mean(percent_out, na.rm = TRUE)* 100,
+    sd_percent_out = sd(percent_out, na.rm = TRUE)
+  ) %>%
+  arrange(desc(mean_percent_out))
+
+
+
+```
+
+```{r}
+anova_model <- aov(percent_out ~ area, data = outages_data)
+summary(anova_model)
+```
+
+```{r}
+# Post-hoc test after ANOVA
+Tukey_test <- TukeyHSD(anova_model)
+Tukey_test
+
+tukey_results <- as.data.frame(Tukey_test$area)
+names(tukey_results) <- c("Comparison", "Lower CI", "Upper CI", "p.adj")
+
+```
+
+```{r}
+library(ggplot2)
+
+ggplot(tukey_results, aes(y = Comparison, x = `Lower CI`, xend = `Upper CI`, color = p.adj < 0.05)) +
+  geom_segment(size = 0.2) +  # Draw horizontal line for each comparison
+  geom_point(aes(x = (`Lower CI` + `Upper CI`) / 2), size = 2) +  # Mid-point of the CI as a point
+  geom_vline(xintercept = 0, linetype = "dashed") +  # Reference line at zero difference
+  scale_color_manual(values = c("true" = "blue", "false" = "grey"), guide = FALSE) +
+  labs(title = "Post-Hoc Comparison of Counties (Tukey HSD)",
+       x = "Difference in Mean Percentage Out",
+       y = "County Comparison") +
+  theme_minimal()
+
+```
+
