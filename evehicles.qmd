@@ -3,12 +3,15 @@ title: "Analysis of Electric and Hybrid Vehicle Registrations"
 format: html
 ---
 
+### Load the tidyverse
+
 ```{r setup, include=FALSE}
 library(tidyverse)
 ```
 
+### Load the dataset
+
 ```{r}
-# Load the dataset
 vehicle_data <- read_csv("electric_hybrid_0424.csv")
 
 # Check for any missing values and get a quick overview
@@ -56,14 +59,18 @@ summary(model)
 
 ```
 
+### Calculate residuals
+
 ```{r}
-# Calculate residuals
 residuals <- residuals(model)
 
 # Basic summary of residuals
 summary(residuals)
 
 ```
+
+### Add a Predicted Value
+
 ```{r}
 # Make predictions
 predictions <- predict(model, newdata = vehicle_data)
@@ -76,4 +83,7 @@ vehicle_data$Residuals <- residuals
 vehicle_data |> arrange(desc(Residuals))
 
 ```
+
+## Pick a County
+
 
