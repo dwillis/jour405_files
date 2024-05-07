@@ -88,7 +88,7 @@ vehicle_data |> arrange(desc(Residuals))
 Fill in the county name in the URL - it will be lowercase, with _ separating any words, so "prince_georges" or "queen_annes" or "saint_marys"
 
 ```{r}
-county_evs <- read_csv("https://raw.githubusercontent.com/dwillis/jour405_files/main/{county}.csv")
+county_evs <- read_csv("https://raw.githubusercontent.com/dwillis/jour405_files/main/evs/{county}.csv")
 ```
 
 ### Let's make some regression models to see the trend over time
@@ -126,4 +126,30 @@ ggplot(county_evs, aes(x = Year_Month, y = `PLUG-IN HYBRID`)) +
 
 ```
 
+### All Maryland Plot
+
+```{r}
+vehicle_data <- read_csv("https://raw.githubusercontent.com/dwillis/jour405_files/main/evs/maryland.csv")
+
+vehicle_data <- vehicle_data %>%
+  mutate(Year_Month = ym(Year_Month))
+
+
+ggplot(vehicle_data, aes(x = Year_Month)) +
+  geom_line(aes(y = ELECTRIC, colour = "Electric")) +
+  geom_line(aes(y = `PLUG-IN HYBRID`, colour = "Plug-In Hybrid")) +
+  facet_wrap(~County) +  # Creates a separate plot for each county
+  labs(
+    title = "Vehicle Registrations Over Time by County",
+    x = "Year and Month",
+    y = "Number of Registrations"
+  ) +
+  scale_color_manual(
+    name = "Type",
+    values = c("Electric" = "blue", "Plug-In Hybrid" = "red")
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-axis labels for better readability
+
+```
 
