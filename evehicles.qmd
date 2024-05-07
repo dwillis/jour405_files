@@ -7,15 +7,14 @@ format: html
 
 ```{r setup, include=FALSE}
 library(tidyverse)
+library(lubridate)
 ```
 
 ### Load the dataset
 
 ```{r}
-vehicle_data <- read_csv("electric_hybrid_0424.csv")
+vehicle_data <- read_csv("https://raw.githubusercontent.com/dwillis/jour405_files/main/electric_hybrid_0424.csv")
 
-# Check for any missing values and get a quick overview
-summary(vehicle_data)
 ```
 
 ### Descriptive Statistics
@@ -85,5 +84,46 @@ vehicle_data |> arrange(desc(Residuals))
 ```
 
 ## Pick a County
+
+Fill in the county name in the URL - it will be lowercase, with _ separating any words, so "prince_georges" or "queen_annes" or "saint_marys"
+
+```{r}
+county_evs <- read_csv("https://raw.githubusercontent.com/dwillis/jour405_files/main/{county}.csv")
+```
+
+### Let's make some regression models to see the trend over time
+
+```{r}
+county_evs <- county_evs %>%
+  mutate(Year_Month = ym(Year_Month))
+
+
+model_electric <- lm(ELECTRIC ~ Year_Month, data = county_evs)
+model_plugin <- lm(`PLUG-IN HYBRID` ~ Year_Month, data = county_evs)
+
+summary(model_electric)
+summary(model_plugin)
+
+```
+
+### Let's make some plots
+
+
+```{r}
+# Electric Vehicles Plot
+ggplot(county_evs, aes(x = Year_Month, y = ELECTRIC)) +
+  geom_point() +
+  geom_smooth(method = "lm", color = "blue") +
+  labs(title = "Electric Vehicle Registrations Over Time",
+       x = "Year and Month", y = "Electric Vehicle Registrations")
+
+# Plug-In Hybrids Plot
+ggplot(county_evs, aes(x = Year_Month, y = `PLUG-IN HYBRID`)) +
+  geom_point() +
+  geom_smooth(method = "lm", color = "red") +
+  labs(title = "Plug-In Hybrid Vehicle Registrations Over Time",
+       x = "Year and Month", y = "Plug-In Hybrid Registrations")
+
+```
 
 

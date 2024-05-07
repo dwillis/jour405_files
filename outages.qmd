@@ -11,7 +11,7 @@ library(broom)
 
 ```{r}
 # Sample data loading step - adjust path as necessary
-outages_data <- read_csv("outages.csv")
+outages_data <- read_csv("https://raw.githubusercontent.com/dwillis/jour405_files/main/outages_summary.csv")
 ```
 
 ### Z-Scores
@@ -35,11 +35,10 @@ outliers <- outages_data %>%
 outages_data %>%
   group_by(area) %>%
   summarise(
-    mean_percent_out = mean(percent_out, na.rm = TRUE)* 100,
+    mean_percent_out = mean(percent_out, na.rm = TRUE),
     sd_percent_out = sd(percent_out, na.rm = TRUE)
   ) %>%
   arrange(desc(mean_percent_out))
-
 
 
 ```
@@ -48,6 +47,25 @@ outages_data %>%
 anova_model <- aov(percent_out ~ area, data = outages_data)
 summary(anova_model)
 ```
+
+The results of the ANOVA test are presented in a table format with two rows: "area" and "Residuals".
+
+    "Df" stands for degrees of freedom, which represents the number of independent pieces of information available to estimate a parameter. In this case, "area" has 23 degrees of freedom, indicating the number of groups or levels in the factor being tested, while "Residuals" have 504 degrees of freedom, representing the leftover variability in the data after accounting for the effects of the factor.
+
+    "Sum Sq" is the sum of squares, which measures the total variability in the response variable (dependent variable). In this output, 0.1571 units of variability are attributed to "area", while 2.3007 units of variability are attributed to the residuals.
+
+    "Mean Sq" represents the mean square, which is calculated by dividing the sum of squares by the degrees of freedom. It provides an estimate of the variance. For "area", the mean square is 0.006830, and for "Residuals", it is 0.004565.
+
+    "F value" is the test statistic of the ANOVA test, which is calculated by dividing the mean square of the factor (area) by the mean square of the residuals. It assesses whether there are significant differences among the means of the groups. In this case, the F value is 1.496.
+
+    "Pr(>F)" represents the p-value associated with the F statistic. It indicates the probability of observing an F value as extreme as, or more extreme than, the one calculated from the sample data if the null hypothesis (that all group means are equal) were true. In this example, the p-value is 0.0655, which suggests weak evidence against the null hypothesis. However, it is not below the conventional significance level of 0.05, so we cannot conclude that there are significant differences among the means of the groups based on this test alone.
+
+The ANOVA test assesses whether there are significant differences in means among multiple groups. The results provided indicate the variability attributed to the factor "area" and the residuals, along with the F statistic and associated p-value for testing the null hypothesis of no differences among group means.
+
+
+
+
+
 
 ```{r}
 # Post-hoc test after ANOVA
@@ -73,4 +91,6 @@ ggplot(tukey_results, aes(y = Comparison, x = `Lower CI`, xend = `Upper CI`, col
   theme_minimal()
 
 ```
+
+
 
