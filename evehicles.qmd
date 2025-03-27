@@ -16,6 +16,9 @@ library(lubridate)
 vehicle_data <- read_csv("https://raw.githubusercontent.com/dwillis/jour405_files/main/electric_hybrid_0424.csv")
 
 ```
+Question: which county has the highest per-capita rates of registrations?
+
+Wow, it's St. Mary's, which seems weird.
 
 ### Descriptive Statistics
 
@@ -30,7 +33,7 @@ vehicle_data <- vehicle_data %>%
 
 # Display summary by county
 vehicle_data %>%
-  arrange(desc(Total_Registrations))
+  arrange(desc(Electric_per_1000))
 
 ```
 
